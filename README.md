@@ -1,8 +1,9 @@
-# reCAPTCHA-V2-java
- [![Build Status](https://travis-ci.org/triologygmbh/reCAPTCHA-V2-java.svg?branch=master)](https://travis-ci.org//triologygmbh/reCAPTCHA-V2-java)
-[![JitPack](https://jitpack.io/v//triologygmbh/reCAPTCHA-V2-java.svg)](https://jitpack.io/#triologygmbh/reCAPTCHA-V2-java)
+# reCAPTCHA-V2-jee7
+[![Build Status](https://travis-ci.org/schnatterer/reCAPTCHA-V2-jee7)
+[![JitPack](https://www.jitpack.io/#schnatterer/reCAPTCHA-V2-jee7.svg)](https://www.jitpack.io/#schnatterer/reCAPTCHA-V2-jee7)
 
-Java Bindings for reCAPTCHA V2. See [Verifying the user's response  |  reCAPTCHA  |  Google Developers](https://developers.google.com/recaptcha/docs/verify).
+Java Bindings for reCAPTCHA V2. See [Verifying the user's response  |  reCAPTCHA  |  Google Developers](https://developers.google.com/recaptcha/docs/verify). Basing on JEE7's JAX-RS 2.0 Client API and JSON P 1.0.
+Same API as [triologygmbh/reCAPTCHA-V2-java](https://github.com/triologygmbh/reCAPTCHA-V2-java)
 
 ## Prerequisites
 
@@ -29,8 +30,8 @@ Then add the actual dependency
 
 ```xml
 <dependency>
-    <groupId>com.github.triologygmbh</groupId>
-    <artifactId>reCAPTCHA-V2-java</artifactId>
+    <groupId>com.github.schnatterer</groupId>
+    <artifactId>reCAPTCHA-V2-jee7</artifactId>
     <version>1.0.0</version>
 </dependency>
 ```
