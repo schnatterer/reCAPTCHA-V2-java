@@ -26,12 +26,10 @@ package de.triology.recaptchav2java;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import java.util.function.Function;
 
 /**
@@ -42,78 +40,32 @@ class Http {
     private Http() {}
 
     static String post(String url, String urlParameters) {
-        return withConnectionTo(url, connection -> {
-
-            sendPostRequest(connection, urlParameters);
-
-            return receiveResponse(connection);
-        });
+        try {
+            return postWithExceptions(url, urlParameters);
+        } catch (ProcessingException e){
+            throw new ReCaptchaException("I/O error sending or receiving the response ", e);
+        }
     }
 
-    private static String withConnectionTo(String url, Function<HttpURLConnection, String> runnable) {
-        HttpURLConnection con = null;
+    private static String postWithExceptions(String url, String urlParameters) {
+        return withClient(url, client ->
+            client.target(url)
+                .request()
+                .post(Entity.json(urlParameters))
+                .readEntity(String.class));
+    }
+
+    private static String withClient(String url, Function<Client, String> runnable) {
+        Client client = null;
         try {
-            LOG.trace("Opening connection to {}", url);
-            con = openConnection(url);
-            return runnable.apply(con);
+            LOG.trace("Creating client {}", url);
+            client = ClientBuilder.newClient();
+            return runnable.apply(client);
         } finally {
-            if (con != null) {
-                LOG.trace("Closing connection to {}", url);
-                con.disconnect();
+            if (client != null) {
+                LOG.trace("Closing client for url {}", url);
+                client.close();
             }
         }
-    }
-
-    private static HttpURLConnection openConnection(String url) {
-        try {
-            return (HttpURLConnection) new URL(url).openConnection();
-        } catch (IOException e) {
-            throw new ReCaptchaException("Unable to create URL for posting", e);
-        }
-    }
-
-    private static void sendPostRequest(HttpURLConnection con, String bodyParams) {
-        try {
-            sendPostRequestWithExceptions(con, bodyParams);
-        } catch (IOException e) {
-            throw new ReCaptchaException("I/O error while sending the POST request", e);
-        }
-    }
-
-    private static void sendPostRequestWithExceptions(HttpURLConnection con, String parameters) throws IOException {
-        con.setRequestMethod("POST");
-        con.setDoOutput(true);
-
-        LOG.trace("Posting parameters {} to url {}", parameters, con.getURL());
-        try (DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
-            wr.writeBytes(parameters);
-            wr.flush();
-        }
-    }
-
-    private static String receiveResponse(HttpURLConnection con) {
-        try {
-            return receiveResponseWithExceptions(con);
-        } catch (IOException e) {
-            throw new ReCaptchaException("I/O error receiving the response ", e);
-        }
-    }
-
-    private static String receiveResponseWithExceptions(HttpURLConnection con) throws IOException {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
-            LOG.trace("Receiving response from {}. Status Code: {}", con.getURL(),  con.getResponseCode());
-            String response = toString(in);
-            LOG.trace("Received response from {}: {}", con.getURL(), response);
-            return response;
-        }
-    }
-
-    private static String toString(BufferedReader in) throws IOException {
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        return response.toString();
     }
 }

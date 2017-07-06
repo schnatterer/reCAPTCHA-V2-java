@@ -35,7 +35,6 @@ public class HttpTest {
     @Test
     public void handlesInvalidUrl() throws Exception {
         expectedException.expect(ReCaptchaException.class);
-        expectedException.expectMessage("URL");
         Http.post("not an URL!", "");
     }
 }
